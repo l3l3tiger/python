@@ -1,0 +1,50 @@
+import smtplib
+from email.header import Header  # 邮件头
+from email.mime.text import MIMEText  # 邮件正文
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+
+# 登陆smtp邮箱
+smtp_host = "smtp.qq.com"
+smtp_port = 465
+sender = '444288997@qq.com'  # 发送方的邮箱地址
+sender_pass = 'runtnngxqekebjdb'  # 邮箱提供的授权码，可在第三方登录
+
+
+stmp_server = smtplib.SMTP_SSL(smtp_host, smtp_port)  # 发件人邮箱中的SMTP服务器，加密端口是465
+stmp_server.login(sender, sender_pass)  # 发件人邮箱账号，邮箱授权码
+
+
+# 正文内容
+mail_body = '''
+<h5>你好，这是一份来自外星的邮件</h5>
+<p>
+地球人你好，这是一份外星球的来信，我们掌握了你们的发送邮件技术...<a href="https://www.name.com/zh-cn/">这是我的链接</a>
+</p>
+'''
+
+
+# 构造邮件内容
+receivers = ['444288997@qq.com','leletiger@126.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+files = ["波士胶(上海)管理有限公司.docx","安徽金春无纺布股份有限公司.docx"]
+for file in files:
+    # 新建邮件
+    message = MIMEMultipart()
+    message['Subject'] = Header('Python SMTP 邮件测试', 'utf-8')  # 邮件标题
+    message['From'] = Header("来自机器人的问候<444288997@qq.com>", 'utf-8')   # 发送者
+    message['To'] = Header(file, 'utf-8')        # 接收者
+    message['Reply-to'] = Header('天外来客<leletiger@126.com>', 'utf-8')  # 回复地址
+    # message['Cc'] = Header('天外来客<leletiger@126.com>', 'utf-8')  # 抄送地址
+    message['Bcc'] = Header('天外来客<leletiger@126.com>', 'utf-8')  # 秘密抄送地址
+    # 添加邮件正文
+    text_msg = MIMEText(mail_body, 'html', 'utf-8')  # 邮件正文
+    message.attach(text_msg)
+    # message["Content-Disposition"] = 'attachment; filename="csdn.html"'
+    # 添加邮件附件
+    file_msg = open(file, 'rb').read()
+    file_msg = MIMEText(file_msg, "base64", "utf-8")
+    file_msg["Content-Type"] = 'application/octet-stream'
+    file_msg.add_header('Content-Disposition', 'attachment', filename=file)
+    message.attach(file_msg)
+    stmp_server.sendmail(sender, receivers, message.as_string())
+
